@@ -143,8 +143,9 @@ NOTES:
  *   Rating: 1
  */
 int bitXor(int x, int y) {
-
-  return 2;
+  int left = ~(x & y);
+  int right = ~(~x & ~y);
+  return left & right;
 }
 /* 
  * tmin - return minimum two's complement integer 
