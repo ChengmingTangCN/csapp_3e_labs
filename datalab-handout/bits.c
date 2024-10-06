@@ -282,7 +282,44 @@ int logicalNeg(int x) {
  *  Rating: 4
  */
 int howManyBits(int x) {
-  return 0;
+  int mask31 = (1 << 31) + ~0;
+  int xf = (x >> 31) & 1;
+  /* Zero the sign bit */
+  int y = x & mask31;
+  int flag = ~(xf + ~0);
+  int maskh16, maskh8, maskh4, maskh2, maskh1;
+  int a16, a8, a4, a2, a1, a0;
+
+  /* 0b1a...a -> 0b0b...b and b = ~a */
+  /* 0b0a...a -> 0b0a...a */
+  y ^= mask31 & flag;
+
+  /* binary search */
+
+  maskh16 = ((1 << 16) + ~0);
+  maskh16 = maskh16 << 16;
+  a16 = !!(y & maskh16) << 4;
+  y = y >> a16;
+
+  maskh8 = ((1 << 8) + ~0) << 8;
+  a8 = !!(y & maskh8) << 3;
+  y = y >> a8;
+
+  maskh4 = ((1 << 4) + ~0) << 4;
+  a4 = !!(y & maskh4) << 2;
+  y = y >> a4;
+
+  maskh2 = ((1 << 2) + ~0) << 2;
+  a2 = !!(y & maskh2) << 1;
+  y = y >> a2;
+
+  maskh1 = 0x2;
+  a1 = !!(y & maskh1);
+  y = y >> a1;
+
+  a0 = y;
+
+  return 1 + a16 + a8 + a4 + a2 + a1 + a0;
 }
 //float
 /* 
