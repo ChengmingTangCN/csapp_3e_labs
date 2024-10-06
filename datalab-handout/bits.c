@@ -167,7 +167,7 @@ int tmin(void) {
 int isTmax(int x) {
   int y = x + 1;
   int z = x ^ y;
-  int k = z ^ -1;
+  int k = z ^ ~0;
   return !k & !!~x;
 }
 /* 
