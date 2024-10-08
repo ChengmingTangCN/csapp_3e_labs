@@ -334,7 +334,30 @@ int howManyBits(int x) {
  *   Rating: 4
  */
 unsigned floatScale2(unsigned uf) {
-  return 2;
+  unsigned s = uf >> 31;
+  unsigned exp_mask = 0xff;
+  unsigned exp = (uf >> 23) & exp_mask;
+  unsigned frac_mask = 0x7fffff;
+  unsigned frac = uf & frac_mask;
+  if (exp == 0) {
+    // Denormalized values
+    frac += frac;
+    if (frac > frac_mask) {
+      frac &= frac_mask;
+      exp = 1;
+    }
+    return (s << 31) | (exp << 23) | frac;
+  } else if (exp == exp_mask) {
+    // NaN or +/- infinity
+    return uf;
+  } else {
+    // Normalized values
+    ++exp;
+    if (exp >= exp_mask) {
+      return (s << 31) | (exp_mask << 23);
+    }
+    return (s << 31) | (exp << 23) | frac;
+  }
 }
 /* 
  * floatFloat2Int - Return bit-level equivalent of expression (int) f
