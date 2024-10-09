@@ -372,7 +372,54 @@ unsigned floatScale2(unsigned uf) {
  *   Rating: 4
  */
 int floatFloat2Int(unsigned uf) {
-  return 2;
+  unsigned exp_mask = 0xff;
+  unsigned frac_mask = 0x7fffff;
+  unsigned s = uf >> 31;
+  unsigned exp = (uf >> 23) & exp_mask;
+  unsigned frac = uf & frac_mask;
+  unsigned bound = 0x80000000;
+
+  if (exp == 0) {
+    // Denormalized values
+    return 0;
+  } else if (exp == exp_mask) {
+    // Infinity or Nan
+    return 0x80000000;
+  } else {
+    // Normalized values
+    unsigned bias = 127;
+    int E = exp - bias;
+    if (E < -1) {
+      return 0;
+    } else if (E == - 1) {
+      if (frac == 0) {
+        return s ? -1 : 1;
+      }
+      return 0;
+    } else {
+      frac |= 0x800000;
+      if (E >= 23) {
+        if (E - 23 > 8) {
+          return 0x80000000;
+        }
+        frac <<= E - 23;
+        if (s) {
+          if (frac > bound) {
+            return 0x80000000;
+          }
+          return -frac;
+        } else {
+          if (frac >= bound) {
+            return 0x80000000;
+          }
+          return frac;
+        }
+      } else {
+        frac >>= 23 - E;
+        return s ? -frac : frac;
+      }
+    }
+  }
 }
 /* 
  * floatPower2 - Return bit-level equivalent of the expression 2.0^x
