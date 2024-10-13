@@ -435,5 +435,28 @@ int floatFloat2Int(unsigned uf) {
  *   Rating: 4
  */
 unsigned floatPower2(int x) {
-    return 2;
+  unsigned exp_mask = 0xff;
+  unsigned f_zero = 0;
+  unsigned f_inf = exp_mask << 23;
+  int bias = 127;
+
+  if (x < 1 - bias - 23) {
+    // Result is too small
+    return f_zero;
+  }
+
+  if (x > 254 - bias) {
+    // Result is too large
+    return f_inf;
+  }
+
+  if (x < 1 - bias) {
+    // Denormalized values
+    unsigned y = 1 - bias - x;
+    return 1 << y;
+  } else {
+    // Normalized values
+    unsigned exp = (bias + x) & exp_mask;
+    return exp << 23;
+  }
 }
